@@ -209,17 +209,20 @@ let board = {
 		}
 
 		// Loop solving
-		i = undefX.length - 1; // i--
+		i = undefX.length - 1;
 		while (i >= 0) {
-			if (this.possibilities[undefX[i]][undefY[i]].length < this.solveCounter[undefX[i]][undefY[i]]) {
+			if (this.possibilities[undefX[i]][undefY[i]][this.solveCounter[undefX[i]][undefY[i]]] == undefined) {
 				this.solveCounter[undefX[i]][undefY[i]] = 0;
+				if (i < undefX.length - 1) {
+					this.solveCounter[undefX[i+1]][undefY[i+1]]++;
+				}
 				i++;
-				this.solveCounter[undefX[i+1]][undefY[i+1]]++;
 			} else {
 				newboard[undefX[i]][undefY[i]] = this.possibilities[undefX[i]][undefY[i]][this.solveCounter[undefX[i]][undefY[i]]];
 				if (this.check(newboard)) {
 					i--;
 				} else {
+					newboard[undefX[i]][undefY[i]] = undefined;
 					this.solveCounter[undefX[i]][undefY[i]]++;
 				}
 			}
@@ -384,7 +387,7 @@ presetboard3[8][8] = 6;
 
 for (var i = 8; i >= 0; i--) {
 	for (var j = 8; j >= 0; j--) {
-		board.state[i][j] = presetboard1[i][j];
+		board.state[i][j] = presetboard3[i][j];
 	}
 }
 
