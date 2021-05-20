@@ -2,7 +2,6 @@
 let board = {
 	// Stores the state of the board
 	state: [[],[],[],[],[],[],[],[],[]],
-	solved: false,
 
 	// Variable for solver to use
 	possibilities: [[],[],[],[],[],[],[],[],[]],
@@ -94,158 +93,141 @@ let board = {
 		// Already solved squares have 1 possiblity
 		this.possibilities = this.copyof();
 
-		while (!this.solved) {
-			// Loop through each square, skipping already solved squares
-			for (var i = this.state.length - 1; i >= 0; i--) {
-				for (var j = this.state[i].length - 1; j >= 0; j--) {
-					if (this.state[i][j] == undefined) {
-						// Check for possibilities on the row
-						if (this.possibilities[i][j] == undefined) {
-							this.possibilities[i][j] = [];
-						}
+		// Loop through each square, skipping already solved squares
+		for (var i = this.state.length - 1; i >= 0; i--) {
+			for (var j = this.state[i].length - 1; j >= 0; j--) {
+				if (this.state[i][j] == undefined) {
+				// Check for possibilities on the row
+				this.possibilities[i][j] = [];
 
-						nonPossibilities = [];
-						for (var L =  8; L >= 0; L--) {
-							if (this.state[i][L] !== undefined && this.state[i][L] !== this.state[i][j]) {
-								nonPossibilities.push(this.state[i][L]);
-							}
-						}
-						for (var L =  8; L >= 0; L--) {
-							if (!nonPossibilities.includes(L+1)) {
-								this.possibilities[i][j].push(L+1);
-							}
-						}
+				nonPossibilities = [];
+				for (var L =  8; L >= 0; L--) {
+					if (this.state[i][L] !== undefined && this.state[i][L] !== this.state[i][j]) {
+						nonPossibilities.push(this.state[i][L]);
+					}
+				}
+				for (var L =  8; L >= 0; L--) {
+					if (!nonPossibilities.includes(L+1)) {
+						this.possibilities[i][j].push(L+1);
+					}
+				}
 
-						// Check for possibilities on the column
-						//    Get column
-						colPossibilities = [];
-						for (var L = 8; L >= 0; L--) {
-							colPossibilities.push(this.state[L][j]);
+					// Check for possibilities on the column
+					//    Get column
+					colPossibilities = [];
+					for (var L = 8; L >= 0; L--) {
+						colPossibilities.push(this.state[L][j]);
+					}
+					//    Pull non-possibilities from column
+					nonPossibilities = [];
+					for (var L =  8; L >= 0; L--) {
+						if (colPossibilities[L] !== undefined && colPossibilities[L] !== this.state[i][j]) {
+							nonPossibilities.push(colPossibilities[L]);
 						}
-						//    Pull non-possibilities from column
-						nonPossibilities = [];
-						for (var L =  8; L >= 0; L--) {
-							if (colPossibilities[L] !== undefined && colPossibilities[L] !== this.state[i][j]) {
-								nonPossibilities.push(colPossibilities[L]);
-							}
+					}
+					//    Invert to get possibilities from column
+					localPossibilities = []
+					for (var L =  9; L >= 1; L--) {
+						if (!nonPossibilities.includes(L)) {
+							localPossibilities.push(L);
 						}
-						//    Invert to get possibilities from column
-						localPossibilities = []
-						for (var L =  9; L >= 1; L--) {
-							if (!nonPossibilities.includes(L)) {
-								localPossibilities.push(L);
-							}
+					}
+					//    Compare to current possibilities to eliminate options
+					for (var L = 9; L >= 1; L--) {
+						if (this.possibilities[i][j].includes(L) && !localPossibilities.includes(L)) {
+							this.possibilities[i][j].splice(this.possibilities[i][j].indexOf(L),1);
 						}
-						//    Compare to current possibilities to eliminate options
-						for (var L = 9; L >= 1; L--) {
-							if (this.possibilities[i][j].includes(L) && !localPossibilities.includes(L)) {
-								this.possibilities[i][j].splice(this.possibilities[i][j].indexOf(L),1);
-							}
-						}
+					}
 
-						// Check for possibilities in the box
-						//    Get box
-						boxPossibilities = [];
-						boxPossibilitiesOffset = [0, 0, 0, 3, 3, 3, 6, 6, 6];
-						for (var L = 2+boxPossibilitiesOffset[i]; L >= boxPossibilitiesOffset[i]; L--) {
-							for (var P = 2+boxPossibilitiesOffset[j]; P >= boxPossibilitiesOffset[j]; P--) {
-								boxPossibilities.push(this.state[L][P]);
-							}
+					// Check for possibilities in the box
+					//    Get box
+					boxPossibilities = [];
+					boxPossibilitiesOffset = [0, 0, 0, 3, 3, 3, 6, 6, 6];
+					for (var L = 2+boxPossibilitiesOffset[i]; L >= boxPossibilitiesOffset[i]; L--) {
+						for (var P = 2+boxPossibilitiesOffset[j]; P >= boxPossibilitiesOffset[j]; P--) {
+							boxPossibilities.push(this.state[L][P]);
 						}
-						//    Pull non-possibilities from box
-						nonPossibilities = [];
-						for (var L =  8; L >= 0; L--) {
-							if (boxPossibilities[L] !== undefined && boxPossibilities[L] !== this.state[i][j]) {
-								nonPossibilities.push(boxPossibilities[L]);
-							}
+					}
+					//    Pull non-possibilities from box
+					nonPossibilities = [];
+					for (var L =  8; L >= 0; L--) {
+						if (boxPossibilities[L] !== undefined && boxPossibilities[L] !== this.state[i][j]) {
+							nonPossibilities.push(boxPossibilities[L]);
 						}
-						//    Invert to get possibilities from box
-						localPossibilities = []
-						for (var L =  9; L >= 1; L--) {
-							if (!nonPossibilities.includes(L)) {
-								localPossibilities.push(L);
-							}
+					}
+					//    Invert to get possibilities from box
+					localPossibilities = []
+					for (var L =  9; L >= 1; L--) {
+						if (!nonPossibilities.includes(L)) {
+							localPossibilities.push(L);
 						}
-						//    Compare to current possibilities to eliminate options
-						for (var L = 9; L >= 1; L--) {
-							if (this.possibilities[i][j].includes(L) && !localPossibilities.includes(L)) {
-								this.possibilities[i][j].splice(this.possibilities[i][j].indexOf(L),1);
-							}
+					}
+					//    Compare to current possibilities to eliminate options
+					for (var L = 9; L >= 1; L--) {
+						if (this.possibilities[i][j].includes(L) && !localPossibilities.includes(L)) {
+							this.possibilities[i][j].splice(this.possibilities[i][j].indexOf(L),1);
 						}
-
-						// Make sure undefined is not left in the beginning
-						if (this.possibilities[i][j][0] === undefined) {
-							this.possibilities[i][j].splice(0,1);
-						}
+					}
+					// Make sure undefined is not left in the beginning
+					if (this.possibilities[i][j][0] === undefined) {
+						this.possibilities[i][j].splice(0,1);
 					}
 				}
 			}
+		}
 
-			// Check if any squares have only 1 possibility
-			newboard = this.copyof();
-			for (var i = this.state.length - 1; i >= 0; i--) {
-				for (var j = this.state[i].length - 1; j >= 0; j--) {
-					if (Array.isArray(this.possibilities[i][j]) && this.possibilities[i][j].length === 1) {
-						newboard[i][j] = this.possibilities[i][j][0];
-					}
+		// Check if any squares have only 1 possibility
+		newboard = this.copyof();
+		for (var i = this.state.length - 1; i >= 0; i--) {
+			for (var j = this.state[i].length - 1; j >= 0; j--) {
+				if (Array.isArray(this.possibilities[i][j]) && this.possibilities[i][j].length === 1) {
+					newboard[i][j] = this.possibilities[i][j][0];
 				}
 			}
+		}
 
-			// Make sure it is a valid board before passing it through
-			if (this.check(newboard)) {
-				for (var i = 8; i >= 0; i--) {
-					for (var j = 8; j >= 0; j--) {
-						this.state[i][j] = newboard[i][j];
-					}
-				}
-			}
-
-			// Get unsolved X and Y and set solve counter
-			undefX = [];
-			undefY = [];
+		// Make sure it is a valid board before passing it through
+		if (this.check(newboard)) {
 			for (var i = 8; i >= 0; i--) {
 				for (var j = 8; j >= 0; j--) {
-					if (this.state[i][j] == undefined) {
-						undefX.push(i);
-						undefY.push(j);
-						this.solveCounter[i][j] = 0;
-					}
+					this.state[i][j] = newboard[i][j];
 				}
 			}
+		}
 
-			// Loop solving
-			i = undefX.length - 1; // i--
-			while (i >= 0) {
-				if (this.possibilities[undefX[i]][undefY[i]].length < this.solveCounter[undefX[i]][undefY[i]]) {
-					this.solveCounter[undefX[i]][undefY[i]] = 0;
-					i++;
-					this.solveCounter[undefX[i+1]][undefY[i+1]]++;
+		// Get unsolved X and Y and set solve counter
+		undefX = [];
+		undefY = [];
+		for (var i = 8; i >= 0; i--) {
+			for (var j = 8; j >= 0; j--) {
+				if (this.state[i][j] == undefined) {
+					undefX.push(i);
+					undefY.push(j);
+					this.solveCounter[i][j] = 0;
+				}
+			}
+		}
+
+		// Loop solving
+		i = undefX.length - 1; // i--
+		while (i >= 0) {
+			if (this.possibilities[undefX[i]][undefY[i]].length < this.solveCounter[undefX[i]][undefY[i]]) {
+				this.solveCounter[undefX[i]][undefY[i]] = 0;
+				i++;
+				this.solveCounter[undefX[i+1]][undefY[i+1]]++;
+			} else {
+				newboard[undefX[i]][undefY[i]] = this.possibilities[undefX[i]][undefY[i]][this.solveCounter[undefX[i]][undefY[i]]];
+				if (this.check(newboard)) {
+					i--;
 				} else {
-					newboard[undefX[i]][undefY[i]] = this.possibilities[undefX[i]][undefY[i]][this.solveCounter[[undefX[i]][undefY[i]]]];
-					console.table(this.possibilities[undefX[i]][undefY[i]]);
-					if (this.check(newboard)) {
-						i--;
-					} else {
-						this.solveCounter[[undefX[i]][undefY[i]]]++;
-					}
+					this.solveCounter[undefX[i]][undefY[i]]++;
 				}
 			}
-
-			// Check if any rows are not solved and exits if all of them are solved
-			var solveCheck = [];
-			for (var i = this.state.length - 1; i >= 0; i--) {
-				solveCheck[i] = true
-				if (this.state[i].includes(undefined)){
-					solveCheck[i] = false;
-				}
+		}
+		for (var i = 8; i >= 0; i--) {
+			for (var j = 8; j >= 0; j--) {
+				this.state[i][j] = newboard[i][j];
 			}
-			if (!solveCheck.includes(false)) {
-				this.solved = true;
-			}
-
-			// Exit early for testing
-			//this.solved = true;
-			this.display();
 		}
 	},
 	copyof: function() {
@@ -402,7 +384,7 @@ presetboard3[8][8] = 6;
 
 for (var i = 8; i >= 0; i--) {
 	for (var j = 8; j >= 0; j--) {
-		board.state[i][j] = presetboard3[i][j];
+		board.state[i][j] = presetboard1[i][j];
 	}
 }
 
